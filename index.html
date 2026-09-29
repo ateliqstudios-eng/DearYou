@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dear You</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#f6c9d6;      /* soft rose */
+  --wine:#fff6f1;       /* pearl */
+  --rose:#b8496d;
+  --blush:#7a2545;      /* main text: deep rose */
+  --gold:#b98a3e;
+  --paper:#fbf1ea;
+  --ink:#4a2238;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{
+  background:radial-gradient(120% 90% at 50% 0%,var(--wine) 0%,#fbdfe6 50%,var(--night) 100%) fixed;
+  color:var(--blush);
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:1.25rem;line-height:1.7;
+  overflow-x:hidden;
+}
+canvas#petals{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+section{position:relative;z-index:1;padding:clamp(4rem,10vh,7rem) 1.5rem;text-align:center}
+.script{font-family:'Pinyon Script',cursive;font-weight:400}
+
+/* HERO */
+#hero{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem}
+#hero small{font-style:italic;color:var(--rose);font-size:1.15rem;letter-spacing:.08em;opacity:0;animation:rise 2s .3s forwards}
+#hero h1{
+  font-size:clamp(4.5rem,18vw,11rem);line-height:1;color:var(--blush);
+  text-shadow:0 2px 30px rgba(255,255,255,.9),0 0 60px rgba(255,255,255,.6);
+  opacity:0;animation:rise 2.4s .9s forwards;
+}
+#hero p{max-width:26ch;font-style:italic;color:var(--rose);opacity:0;animation:rise 2s 2.2s forwards}
+.hint{position:absolute;bottom:2rem;color:var(--gold);font-size:.95rem;font-style:italic;opacity:0;animation:rise 2s 3.4s forwards}
+.hint::after{content:"";display:block;width:1px;height:38px;margin:.6rem auto 0;background:linear-gradient(var(--gold),transparent);animation:drip 2.2s infinite}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes drip{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ENVELOPE */
+#letter-wrap{display:flex;flex-direction:column;align-items:center;gap:2rem}
+.envelope{
+  position:relative;width:min(340px,86vw);aspect-ratio:1.5;border:0;cursor:pointer;background:none;
+  perspective:900px;transition:transform .5s;
+}
+.envelope:hover{transform:translateY(-4px)}
+.envelope:focus-visible{outline:2px solid var(--gold);outline-offset:8px;border-radius:6px}
+.env-body{position:absolute;inset:0;border-radius:6px;background:linear-gradient(160deg,#f3cfd6,#e5a9b8);box-shadow:0 26px 50px rgba(150,60,90,.28)}
+.env-body::before,.env-body::after{content:"";position:absolute;inset:0;border-radius:6px}
+.env-body::before{background:linear-gradient(to top right,transparent 49.5%,rgba(120,40,70,.18) 50%) left/50% 100% no-repeat,linear-gradient(to top left,transparent 49.5%,rgba(120,40,70,.18) 50%) right/50% 100% no-repeat}
+.flap{
+  position:absolute;left:0;right:0;top:0;height:56%;transform-origin:top;
+  background:linear-gradient(#ecb7c3,#dd9aac);
+  clip-path:polygon(0 0,100% 0,50% 100%);transition:transform .9s cubic-bezier(.6,0,.2,1);
+}
+.seal{
+  position:absolute;left:50%;top:56%;width:58px;height:58px;translate:-50% -50%;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#c0405e,#7d1732);color:#f8dfe4;
+  display:grid;place-items:center;font-size:1.5rem;box-shadow:0 6px 14px rgba(90,20,40,.35);
+  transition:opacity .4s,scale .4s;z-index:2;
+}
+.envelope.open .flap{transform:rotateX(180deg)}
+.envelope.open .seal{opacity:0;scale:.4}
+.tap{font-style:italic;color:var(--gold)}
+.envelope.open + .tap{visibility:hidden}
+
+.paper{
+  width:min(640px,100%);background:var(--paper);color:var(--ink);text-align:left;
+  padding:clamp(2rem,6vw,3.6rem);border-radius:4px;position:relative;
+  box-shadow:0 30px 70px rgba(150,60,90,.25);
+  max-height:0;overflow:hidden;opacity:0;padding-block:0;
+  transition:max-height 1.6s ease,opacity 1s .3s,padding .8s;
+}
+.paper.show{max-height:3000px;opacity:1;padding-block:clamp(2rem,6vw,3.6rem)}
+.paper::before{content:"";position:absolute;inset:10px;border:1px solid rgba(154,90,110,.3);pointer-events:none}
+.paper .salute{font-size:3rem;color:#a63a5c;line-height:1.1;margin-bottom:1rem}
+.paper p{margin-bottom:1.1rem}
+.paper .sign{margin-top:1.6rem;text-align:right}
+.paper .sign span{display:block;font-size:2.4rem;color:#a63a5c;line-height:1.2}
+
+/* ADORE */
+h2{font-size:clamp(2.6rem,8vw,4.2rem);color:var(--rose);margin-bottom:2.4rem;font-weight:400}
+.adore{list-style:none;max-width:34rem;margin:0 auto;padding:0}
+.adore li{padding:1.3rem 0;font-size:1.45rem;font-style:italic}
+.adore li+li::before{content:"❦";display:block;color:var(--gold);font-style:normal;font-size:1rem;margin:-.6rem 0 1.2rem;opacity:.8}
+
+/* COUNTER */
+.count{display:flex;justify-content:center;gap:clamp(1.2rem,5vw,3rem);flex-wrap:wrap;margin-top:1rem}
+.count div{min-width:5rem}
+.count b{display:block;font-weight:500;font-size:clamp(2.6rem,9vw,4rem);color:var(--gold);line-height:1;font-variant-numeric:tabular-nums}
+.count span{font-style:italic;color:var(--rose)}
+
+/* CLOSING */
+#end{padding-bottom:8rem}
+#end .script{font-size:clamp(3rem,11vw,6rem);color:var(--blush);text-shadow:0 2px 30px rgba(255,255,255,.9)}
+.heart{display:inline-block;color:#e0587c;font-size:2.4rem;margin-top:1.4rem;animation:beat 1.8s infinite;cursor:pointer;background:none;border:0}
+@keyframes beat{0%,100%{transform:scale(1)}14%{transform:scale(1.25)}28%{transform:scale(1)}42%{transform:scale(1.18)}70%{transform:scale(1)}}
+footer{position:relative;z-index:1;text-align:center;padding:0 1rem 2.5rem;color:rgba(140,60,90,.65);font-size:.95rem;font-style:italic}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition-duration:.01s!important}
+  #hero small,#hero h1,#hero p,.hint{opacity:1}
+}
+</style>
+</head>
+<body>
+<canvas id="petals" aria-hidden="true"></canvas>
+
+<section id="hero">
+  <small id="h-small"></small>
+  <h1 class="script">Dear <span id="h-name">Amara</span>,</h1>
+  <p id="h-line"></p>
+  <div class="hint">scroll gently</div>
+</section>
+
+<section id="letter-wrap">
+  <h2 class="script">A letter, just for you</h2>
+  <button class="envelope" id="env" aria-expanded="false" aria-controls="paper" aria-label="Open the letter">
+    <div class="env-body"></div><div class="flap"></div><div class="seal">♥</div>
+  </button>
+  <div class="tap" id="tap">tap to open</div>
+  <article class="paper" id="paper" aria-live="polite">
+    <div class="salute script" id="salute"></div>
+    <div id="body"></div>
+    <div class="sign">Always yours,<span class="script" id="from"></span></div>
+  </article>
+</section>
+
+<section id="adore">
+  <h2 class="script">Little things I adore</h2>
+  <ul class="adore" id="adore-list"></ul>
+</section>
+
+<section id="time">
+  <h2 class="script">Time spent loving you</h2>
+  <div class="count" id="count" aria-live="off"></div>
+</section>
+
+<section id="end">
+  <p class="script" id="closing"></p>
+  <button class="heart" id="heart" aria-label="Send a little love">♥</button>
+</section>
+<footer>Made with love · <span id="year"></span></footer>
+
+<script>
+/* ============ ✎ CUSTOMISE EVERYTHING HERE ============ */
+const LOVE = {
+  to: "Amara",                       // their name
+  from: "Julian",                     // your name
+  tagline: "Some things are better said slowly, and in ink.",
+  since: "2024-02-14",               // the day it began (YYYY-MM-DD)
+  letter: [
+    "I have started this letter a hundred times, and every version ended the same way: with me smiling at the page, unable to find words big enough.",
+    "You make ordinary days feel like they were arranged just for us. The quiet mornings, the laughter that comes from nowhere, the way home stopped being a place and became a person.",
+    "Thank you for your patience, for your softness, and for the way you love without keeping score. I am better because you are in my life, and I never want to forget how lucky that is.",
+    "So this is my small promise, written where you can always find it: I will choose you today, tomorrow, and on all the days that have no names yet."
+  ],
+  adore: [
+    "The way you laugh before you finish the joke",
+    "How your hand finds mine without looking",
+    "Your voice when you are sleepy and honest",
+    "The kindness you think nobody notices",
+    "Every plan that somehow includes me"
+  ],
+  closing: "I love you. Always."
+};
+/* ===================================================== */
+
+const $ = id => document.getElementById(id);
+document.title = "Dear " + LOVE.to;
+$("h-name").textContent = LOVE.to;
+$("h-small").textContent = "a letter, written with love";
+$("h-line").textContent = LOVE.tagline;
+$("salute").textContent = "My dearest " + LOVE.to + ",";
+$("from").textContent = LOVE.from;
+$("closing").textContent = LOVE.closing;
+$("year").textContent = new Date().getFullYear();
+LOVE.letter.forEach(t => { const p = document.createElement("p"); p.textContent = t; $("body").appendChild(p); });
+LOVE.adore.forEach(t => { const li = document.createElement("li"); li.textContent = t; $("adore-list").appendChild(li); });
+
+/* Envelope */
+const env = $("env"), paper = $("paper");
+env.addEventListener("click", () => {
+  const open = env.classList.toggle("open");
+  paper.classList.toggle("show", open);
+  env.setAttribute("aria-expanded", open);
+  if (open) setTimeout(() => paper.scrollIntoView({behavior:"smooth", block:"center"}), 500);
+});
+
+/* Counter */
+const start = new Date(LOVE.since + "T00:00:00");
+function tick(){
+  let s = Math.max(0, Math.floor((Date.now() - start) / 1000));
+  const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
+  $("count").innerHTML = [[d,"days"],[h,"hours"],[m,"minutes"],[sec,"seconds"]]
+    .map(([n,l]) => `<div><b>${String(n).padStart(2,"0")}</b><span>${l}</span></div>`).join("");
+}
+tick(); setInterval(tick, 1000);
+
+/* Falling petals */
+const cv = $("petals"), cx = cv.getContext("2d");
+let W, H, petals = [];
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function size(){ W = cv.width = innerWidth; H = cv.height = innerHeight; }
+addEventListener("resize", size); size();
+function petal(burst){
+  return {
+    x: burst ? burst.x : Math.random() * W,
+    y: burst ? burst.y : -20 - Math.random() * H,
+    s: 7 + Math.random() * 11,
+    vy: burst ? -2 - Math.random() * 3 : .5 + Math.random() * 1,
+    vx: burst ? (Math.random() - .5) * 4 : 0,
+    a: Math.random() * 6.28, va: (Math.random() - .5) * .03,
+    sw: Math.random() * 6.28, hue: 335 + Math.random() * 25, life: burst ? 1 : 99
+  };
+}
+for (let i = 0; i < (still ? 0 : 34); i++) petals.push(petal());
+function draw(){
+  cx.clearRect(0, 0, W, H);
+  petals.forEach((p, i) => {
+    p.sw += .015; p.a += p.va; p.vy += p.life < 2 ? .06 : 0;
+    p.x += p.vx + Math.sin(p.sw) * .6; p.y += p.vy;
+    if (p.life < 2) p.life -= .006;
+    cx.save(); cx.translate(p.x, p.y); cx.rotate(p.a);
+    cx.globalAlpha = p.life < 2 ? Math.max(p.life, 0) * .95 : .8;
+    const g = cx.createRadialGradient(0, 0, 1, 0, 0, p.s);
+    g.addColorStop(0, `hsl(${p.hue},85%,80%)`); g.addColorStop(1, `hsl(${p.hue},70%,60%)`);
+    cx.fillStyle = g; cx.beginPath();
+    cx.moveTo(0, -p.s); cx.bezierCurveTo(p.s, -p.s * .6, p.s * .8, p.s * .7, 0, p.s);
+    cx.bezierCurveTo(-p.s * .8, p.s * .7, -p.s, -p.s * .6, 0, -p.s); cx.fill(); cx.restore();
+    if (p.y > H + 30 || p.life <= 0) petals[i] = p.life < 2 ? null : Object.assign(petal(), {y: -20});
+  });
+  petals = petals.filter(Boolean);
+  requestAnimationFrame(draw);
+}
+if (!still) draw();
+
+/* Heart burst */
+$("heart").addEventListener("click", e => {
+  if (still) return;
+  const r = e.currentTarget.getBoundingClientRect();
+  for (let i = 0; i < 26; i++) petals.push(petal({x: r.left + r.width / 2, y: r.top + r.height / 2}));
+});
+</script>
+</body>
+</html>
